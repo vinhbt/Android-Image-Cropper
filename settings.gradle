@@ -1,4 +1,2 @@
-include ':test'
+rootProject.name = 'com.sandinh'
 include 'cropper'
-include 'sample'
-include 'quick-start'
