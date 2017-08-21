@@ -1,0 +1,125 @@
+// ./gradlew clean build generateRelease
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def groupId = project.PUBLISH_GROUP_ID
+def artifactId = project.PUBLISH_ARTIFACT_ID
+def version = project.PUBLISH_VERSION
+def url = project.PUBLISH_URL
+
+configurations {
+    optional
+    compile.extendsFrom optional
+    archives {
+        extendsFrom configurations.default
+    }
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+def localReleaseDest = "${buildDir}/release/${version}"
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+uploadArchives {
+    configuration = configurations.archives
+
+    repositories.mavenDeployer {
+
+        beforeDeployment {
+            MavenDeployment deployment -> signing.signPom(deployment)
+        }
+
+        pom.groupId = groupId
+        pom.artifactId = artifactId
+        pom.version = version
+
+        pom.withXml {
+            asNode().dependencies.dependency.findAll { xmlDep ->
+                // mark optional dependencies
+                if (project.configurations.optional.allDependencies.findAll { dep ->
+                    xmlDep.groupId.text() == dep.group && xmlDep.artifactId.text() == dep.name
+                }) {
+                    def xmlOptional = xmlDep.optional[0];
+                    if (!xmlOptional) {
+                        xmlOptional = xmlDep.appendNode('optional')
+                    }
+                    xmlOptional.value = 'true';
+                }
+            }
+        }
+        pom.project {
+            name 'Android Image Crop'
+            packaging 'aar'
+            description 'An Android library that provides an image cropping Activity'
+            url 'https://github.com/vinhbt/Android-Image-Cropper'
+
+            scm {
+                url 'scm:git@github.com:vinhbt/Android-Image-Cropper.git'
+                connection 'scm:git@github.com:vinhbt/Android-Image-Cropper.git'
+                developerConnection 'scm:git@github.com:vinhbt/Android-Image-Cropper.git'
+            }
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }
+
+            organization {
+                name 'sandinh.com'
+                url 'https://sandinh.com'
+            }
+
+            developers {
+                developer {
+                    id 'giabao'
+                    name 'net.sandinh'
+                    email 'giabao@sandinh.net'
+                }
+            }
+        }
+        // Add other pom properties here if you want (developer details / licenses)
+        // repository(url: "file://${localReleaseDest}")
+        repository(url: url) {
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
+        }
+    }
+}
+
+task zipRelease(type: Zip) {
+    from localReleaseDest
+    destinationDir buildDir
+    archiveName "release-${version}.zip"
+}
+
+task generateRelease << {
+    println "Release ${version} can be found at ${localReleaseDest}/"
+    println "Release ${version} zipped can be found ${buildDir}/release-${version}.zip"
+}
+
+generateRelease.dependsOn(uploadArchives)
+generateRelease.dependsOn(zipRelease)
+
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}

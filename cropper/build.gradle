@@ -4,14 +4,18 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'maven-publish'
 
+
 group='com.sandinh'
 
 ext {
     PUBLISH_GROUP_ID = 'com.sandinh'
     PUBLISH_ARTIFACT_ID = 'android-image-cropper'
     PUBLISH_VERSION = '2.4.8'
+    PUBLISH_URL = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
     //gradlew clean build generateRelease
 }
+
+
 
 android {
 
@@ -32,6 +36,7 @@ android {
     }
 }
 
+
 // This configuration is used to publish the library to a local repo while a being forked and modified.
 // It should really be set up so that the version are all in line, and set to be a SNAPSHOT.
 // The version listed here is a temp hack to allow me to keep working.
@@ -42,7 +47,7 @@ publishing {
 
             groupId PUBLISH_GROUP_ID
             artifactId PUBLISH_ARTIFACT_ID
-            version PUBLISH_VERSION
+            version PUBLISH_VERSION + '-SNAPSHOT'
 
             artifact bundleRelease
             pom.withXml {
@@ -68,9 +73,12 @@ publishing {
             }
         }
     }
+
 }
 
-apply from: 'https://raw.githubusercontent.com/vinhbt/release-android-library/master/android-release-aar.gradle'
+apply from: '../.publishing/android-release-aar.gradle'
+
+//apply from: 'https://raw.githubusercontent.com/vinhbt/release-android-library/master/android-release-aar.gradle'
 
 dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
