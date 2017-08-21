@@ -64,38 +64,35 @@ uploadArchives {
                 }
             }
         }
-        pom.project {
-            name 'Android Image Crop'
-            packaging 'aar'
-            description 'An Android library that provides an image cropping Activity'
-            url 'https://github.com/vinhbt/Android-Image-Cropper'
-
-            scm {
-                url 'scm:git@github.com:vinhbt/Android-Image-Cropper.git'
-                connection 'scm:git@github.com:vinhbt/Android-Image-Cropper.git'
-                developerConnection 'scm:git@github.com:vinhbt/Android-Image-Cropper.git'
-            }
-
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+        pom.withXml {
+            asNode().with {
+                appendNode('name', 'Android Image Crop')
+                appendNode('description', 'An Android library that provides an image cropping Activity')
+                appendNode('url', 'https://github.com/vinhbt/Android-Image-Cropper')
+                appendNode('scm').with {
+                    appendNode('url', 'scm:git@github.com:vinhbt/Android-Image-Cropper.git')
+                    appendNode('connection', 'scm:git@github.com:vinhbt/Android-Image-Cropper.git')
                 }
-            }
-
-            organization {
-                name 'sandinh.com'
-                url 'https://sandinh.com'
-            }
-
-            developers {
-                developer {
-                    id 'giabao'
-                    name 'net.sandinh'
-                    email 'giabao@sandinh.net'
+                appendNode('licenses').with {
+                    appendNode('license').with {
+                        appendNode('name', 'The Apache Software License, Version 2.0')
+                        appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+                    }
+                }
+                appendNode('organization').with {
+                    appendNode('name', 'sandinh.com')
+                    appendNode('url', 'https://sandinh.com')
+                }
+                appendNode('developers').with {
+                    appendNode('developer').with {
+                        appendNode('id', 'giabao')
+                        appendNode('name', 'net.sandinh')
+                        appendNode('email', 'giabao@sandinh.net')
+                    }
                 }
             }
         }
+
         // Add other pom properties here if you want (developer details / licenses)
         // repository(url: "file://${localReleaseDest}")
         repository(url: url) {
@@ -103,6 +100,7 @@ uploadArchives {
         }
     }
 }
+
 
 task zipRelease(type: Zip) {
     from localReleaseDest

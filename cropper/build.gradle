@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 // https://docs.gradle.org/current/userguide/publishing_maven.html
 // http://www.flexlabs.org/2013/06/using-local-aar-android-library-packages-in-gradle-builds
+// https://blog.codefx.org/tools/snapshots-gradle-maven-publish-plugin/
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'maven-publish'
 
